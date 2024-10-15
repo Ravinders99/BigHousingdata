@@ -20,6 +20,30 @@ facilities_list = [
     "Community Center", "Shopping Mall", "Park", "Library"
 ]
 
+# Function to introduce rare random anomalies
+def introduce_anomalies(entry):
+    anomaly_chance = random.random()
+    if anomaly_chance < 0.10:  # Introduce anomalies with 10% probability
+        error_type = random.choice(["missing", "invalid", "out_of_range"])
+        
+        if error_type == "missing":
+            # Randomly remove a key
+            key_to_remove = random.choice(list(entry.keys()))
+            entry.pop(key_to_remove)
+        
+        elif error_type == "invalid":
+            # Introduce invalid data types for certain fields
+            key_to_modify = random.choice(["population", "housing_size", "latitude", "longitude", "area_population"])
+            entry[key_to_modify] = "invalid_data"  # Set as string instead of expected data type
+        
+        elif error_type == "out_of_range":
+            # Set values out of reasonable range
+            entry["latitude"] = random.uniform(-200.0, 200.0)  # Invalid latitude range
+            entry["longitude"] = random.uniform(-400.0, 400.0)  # Invalid longitude range
+            entry["population"] = random.randint(-5000, 1000000)  # Population can be negative or unrealistically large
+    
+    return entry
+
 # Function to generate random housing data
 def generate_housing_data(num_entries=5):
     housing_entries = []
@@ -35,6 +59,8 @@ def generate_housing_data(num_entries=5):
             "area_population": random.randint(1000, 500000),  # Population of the surrounding area
             "facilities": random.sample(facilities_list, random.randint(2, 5))  # Random facilities
         }
+        # Introduce 10% anomalies
+        entry = introduce_anomalies(entry)
         housing_entries.append(entry)
     return housing_entries
 
@@ -69,12 +95,11 @@ class CustomJSONEncoder(json.JSONEncoder):
 # Define year range from 2014 to 2024
 year_range = range(2014, 2025)
 
-# Generate housing data with nested structure
-# For example, we generate 500 prizes for each year
-nested_housing_data = generate_housing_json_structure(year_range, "housing", 500)
+# Generate housing data with nested structure and 10% anomalies
+nested_housing_data_with_anomalies = generate_housing_json_structure(year_range, "housing", 500)
 
 # Save the generated data into a JSON file
-with open('large_housing_data_with_years.json', 'w') as f:
-    json.dump(nested_housing_data, f, indent=4, cls=CustomJSONEncoder)
+with open('large_housing_data_with_10_percent_anomalies.json', 'w') as f:
+    json.dump(nested_housing_data_with_anomalies, f, indent=4, cls=CustomJSONEncoder)
 
-print("Large housing data has been saved to large_housing_data_with_years.json")
+print("Large housing data with 10% anomalies has been saved to large_housing_data_with_10_percent_anomalies.json")
